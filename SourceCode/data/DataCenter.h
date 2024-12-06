@@ -72,6 +72,7 @@ public:
     static const int STATE_PAUSE = 2;
     static const int STATE_END = 3;
     static const int STATE_INITIAL = 4;
+	static const int STATE_DIFFICULTY = 5;
     
     int nextState = -1;  // 加入這個來控制狀態切換
 //1201.1UP.END

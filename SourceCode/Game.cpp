@@ -16,6 +16,7 @@
 #include <cstring>
 
 #include "InitialScreen.h" //1201.1UP
+#include "DifficultyScreen.h" //1204.up
 
 // fixed settings
 constexpr char game_icon_img_path[] = "./assets/image/game_icon.png";
@@ -142,6 +143,11 @@ Game::game_init() {
 
 	initialScreen = new InitialScreen();
     initialScreen->init(); //1201.1UP
+
+	difficultyScreen = new DifficultyScreen();
+	//difficultyScreen->init(); //1204.up //1206:可以放在這裡，沒差
+	difficultyScreen->init();
+	
 }
 
 /**
@@ -156,10 +162,24 @@ Game::game_update() {
 	OperationCenter *OC = OperationCenter::get_instance();
 	SoundCenter *SC = SoundCenter::get_instance();
 	static ALLEGRO_SAMPLE_INSTANCE *background = nullptr;
+	//1201.1up
 	if(DC->nextState != -1) {
-        state = static_cast<STATE>(DC->nextState);
-        DC->nextState = -1;  // 重置狀態
+        
+        
+		if(DC->nextState == DC->STATE_DIFFICULTY) { //1206up
+        // 切換到難度選擇畫面時才初始化按鈕
+			
+		}
+		state = static_cast<STATE>(DC->nextState);
+		DC->nextState = -1;  // 重置狀態
+
+		// 重置滑鼠狀態，防止連續觸發
+		DC->mouse_state[1] = false;			//1206up  假裝滑鼠現在跟剛剛都沒按下，防止重複判定
+		DC->prev_mouse_state[1] = false;		//1206up 
+		//提醒:判斷點擊:mouse_state[1]：目前滑鼠按下 && !prev_mouse_state[1]：完全沒按下
+		printf("trigger state change!\n");
     }
+	//1201.1up.end
 	
 	switch(state) {
 		case STATE::START: {
@@ -213,6 +233,11 @@ Game::game_update() {
     		return true;
 		}
 		//1201.1UP_END
+		case STATE::DIFFICULTY_SCREEN:{
+			
+			difficultyScreen->update();
+			return true;
+		}
 	}
 	// If the game is not paused, we should progress update.
 	if(state != STATE::PAUSE) {
@@ -281,6 +306,12 @@ Game::game_draw() {
 			break;
 		}
 		//1201.1UP_END
+		case STATE::DIFFICULTY_SCREEN: {
+			// 在 Game::game_update 或其他切換畫面的地方
+			initialScreen->clearButtons(); //1206UP 這是game類別的成員，所以不用加::
+			difficultyScreen->draw();
+			break;
+		}
 	}
 	al_flip_display();
 }
